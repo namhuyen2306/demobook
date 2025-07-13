@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Book Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 text-gray-800">
+    <nav class="bg-white shadow p-4 flex justify-between items-center">
+      <h1 class="text-4xl font-bold text-indigo-600">BookStore</h1>
+      <div class="space-x-4">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Tìm kiếm"
+          oninput="filterBooks()"
+          class="border px-2 py-1 rounded text-sm"
+        />
+        <button
+          onclick="toggleModal('loginModal')"
+          class="text-sm text-indigo-600 hover:underline"
+        >
+          Đăng nhập
+        </button>
+        <button
+          onclick="toggleModal('registerModal')"
+          class="text-sm text-indigo-600 hover:underline"
+        >
+          Đăng ký
+        </button>
+        <button onclick="toggleCart()" class="relative">
+          🛒
+          <span
+            id="cart-count"
+            class="bg-red-500 text-white text-xs px-1 rounded-full absolute -top-2 -right-2"
+            >0</span
+          >
+        </button>
+      </div>
+    </nav>
+
+    <div class="bg-white shadow p-4 flex items-center gap-4">
+      <label class="font-semibold">Thể loại:</label>
+      <select
+        id="categorySelect"
+        onchange="filterBooks()"
+        class="border rounded px-2 py-1 text-sm"
+      >
+        <option value="Tất cả">Tất cả</option>
+        <option value="Văn học">Văn học</option>
+        <option value="Kỹ năng">Kỹ năng</option>
+        <option value="Khoa học">Khoa học</option>
+        <option value="Tiên hiệp">Tiên hiệp</option>
+        <option value="Kinh dị">Kinh dị</option>
+      </select>
+      <label class="font-semibold ml-4">Giá:</label>
+      <select
+        id="priceSelect"
+        onchange="filterBooks()"
+        class="border rounded px-2 py-1 text-sm"
+      >
+        <option value="all">Tất cả</option>
+        <option value="low">&lt; 100.000₫</option>
+        <option value="medium">100.000₫ – 150.000₫</option>
+        <option value="high">&gt; 150.000₫</option>
+      </select>
+    </div>
+
+    <!-- Book List -->
+    <section
+      id="bookList"
+      class="p-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+    >
+      <!-- render sách bằng JS -->
+    </section>
+
+    <!-- Login -->
+    <div
+      id="loginModal"
+      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden"
+    >
+      <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+        <h2 class="text-xl font-semibold mb-4">Đăng nhập</h2>
+        <form method="POST" action="login.php"></form>
+        <input
+          type="email"
+          placeholder="Email"
+          class="w-full mb-2 p-2 border rounded"
+        />
+        <input
+          type="password"
+          placeholder="Mật khẩu"
+          class="w-full mb-4 p-2 border rounded"
+        />
+        <button class="bg-indigo-600 text-white px-4 py-2 rounded w-full">
+          Đăng nhập
+        </button>
+        <button
+          onclick="toggleModal('loginModal')"
+          class="mt-2 text-sm text-gray-500 hover:underline w-full"
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+
+    <!-- Register -->
+    <div
+      id="registerModal"
+      class="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center hidden"
+    >
+      <div class="bg-white rounded-lg p-6 w-full max-w-sm">
+        <h2 class="text-xl font-semibold mb-4">Đăng ký</h2>
+        <form method="POST" action="register.php"></form>
+        <input
+          type="text"
+          placeholder="Họ và tên"
+          class="w-full mb-2 p-2 border rounded"
+        />
+        <input
+          type="email"
+          placeholder="Email"
+          class="w-full mb-2 p-2 border rounded"
+        />
+        <input
+          type="password"
+          placeholder="Mật khẩu"
+          class="w-full mb-4 p-2 border rounded"
+        />
+        <button class="bg-indigo-600 text-white px-4 py-2 rounded w-full">
+          Đăng ký
+        </button>
+        <button
+          onclick="toggleModal('registerModal')"
+          class="mt-2 text-sm text-gray-500 hover:underline w-full"
+        >
+          Đóng
+        </button>
+      </div>
+    </div>
+
+    <!-- Cart -->
+    <div
+      id="cart"
+      class="fixed right-0 top-0 w-72 bg-white shadow h-full p-4 hidden"
+    >
+      <h2 class="text-lg font-bold mb-4">Giỏ hàng</h2>
+      <ul id="cart-items" class="space-y-2 text-sm"></ul>
+      <button
+        onclick="toggleCart()"
+        class="mt-4 text-indigo-600 hover:underline"
+      >
+        Đóng
+      </button>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+      const books = [
+        {
+          name: "xích tâm tuần thiên",
+          price: "100.000₫",
+          category: "Kỹ năng",
+          img: "https://picsum.photos/150?random=1",
+        },
+        {
+          name: "nắng mùa thu",
+          price: "100000₫",
+          category: "Văn học",
+          img: "https://picsum.photos/150?random=2",
+        },
+        {
+          name: "tuổi xế chiều",
+          price: "150.000₫",
+          category: "Khoa học",
+          img: "https://picsum.photos/150?random=3",
+        },
+        {
+          name: "kĩ năng sống",
+          price: "120.000₫",
+          category: "Kỹ năng",
+          img: "https://picsum.photos/150?random=4",
+        },
+        {
+          name: "hoa cỏ may",
+          price: "80.000₫",
+          category: "Văn học",
+          img: "https://picsum.photos/150?random=5",
+        },
+        {
+          name: "sau bóng lưng",
+          price: "100000₫",
+          category: "Kỹ năng",
+          img: "https://picsum.photos/150?random=6",
+        },
+        {
+          name: "tiên nghịch",
+          price: "150000₫",
+          category: "tiên hiệp",
+          img: "https://picsum.photos/150?random=7",
+        },
+        {
+          name: "tóc hoa râm",
+          price: "150000₫",
+          category: "Văn học",
+          img: "https://picsum.photos/150?random=8",
+        },
+        {
+          name: "trong đêm tối",
+          price: "150000₫",
+          category: "Kinh dị",
+          img: "https://picsum.photos/150?random=9",
+        },
+      ];
+
+      let cart = [];
+
+      function toggleModal(id) {
+        document.getElementById(id).classList.toggle("hidden");
+      }
+
+      function toggleCart() {
+        document.getElementById("cart").classList.toggle("hidden");
+      }
+
+      function addToCart(bookName) {
+        const book = books.find((b) => b.name === bookName);
+        if (book) {
+          cart.push({ name: book.name, price: book.price });
+          document.getElementById("cart-count").textContent = cart.length;
+          renderCart();
+        }
+      }
+
+      function removeFromCart(index) {
+        cart.splice(index, 1);
+        document.getElementById("cart-count").textContent = cart.length;
+        renderCart();
+      }
+
+      function renderCart() {
+        const list = document.getElementById("cart-items");
+        list.innerHTML = "";
+
+        cart.forEach((item, index) => {
+          const li = document.createElement("li");
+          li.className = "flex justify-between items-center border-b pb-1";
+          li.innerHTML = `
+      <div>
+        <strong>${item.name}</strong><br>
+        <span class="text-sm text-gray-600">${item.price}</span>
+      </div>
+      <button onclick="removeFromCart(${index})" class="text-red-500">❌</button>
+    `;
+          list.appendChild(li);
+        });
+
+        const total = calculateTotal();
+        const totalElement = document.createElement("li");
+        totalElement.className = "mt-4 font-semibold text-right";
+        totalElement.innerHTML = `Tổng cộng: ${total.toLocaleString("vi-VN")}₫`;
+        list.appendChild(totalElement);
+      }
+
+      function parsePrice(priceStr) {
+        return parseInt(priceStr.replace(/\D/g, ""));
+      }
+
+      function calculateTotal() {
+        return cart.reduce((sum, item) => sum + parsePrice(item.price), 0);
+      }
+
+      function renderBooks(bookArray) {
+        const container = document.getElementById("bookList");
+        container.innerHTML = "";
+        bookArray.forEach((book) => {
+          const card = document.createElement("div");
+          card.className =
+            "bg-white shadow rounded-lg p-4 flex flex-col items-center";
+          card.innerHTML = `
+          <img src="${book.img}" class="w-32 h-40 object-cover mb-2 rounded" alt="Book">
+          <h2 class="font-semibold text-lg">${book.name}</h2>
+          <p class="text-sm text-gray-600">Giá: ${book.price}</p>
+          <p class="text-xs text-gray-500 mb-2">Thể loại: ${book.category}</p>
+          <button onclick="addToCart('${book.name}')" class="bg-indigo-600 text-white px-4 py-1 rounded hover:bg-indigo-700">Thêm vào giỏ</button>
+        `;
+          container.appendChild(card);
+        });
+      }
+
+      function filterBooks() {
+        const keyword = document
+          .getElementById("searchInput")
+          .value.toLowerCase();
+        const category = document.getElementById("categorySelect").value;
+        const priceFilter = document.getElementById("priceSelect").value;
+
+        const filtered = books.filter((book) => {
+          const nameMatch = book.name.toLowerCase().includes(keyword);
+          const categoryMatch =
+            category === "Tất cả" || book.category === category;
+
+          const priceNum = parseInt(book.price.replace(/\D/g, ""));
+          let priceMatch = true;
+
+          if (priceFilter === "low") priceMatch = priceNum < 100000;
+          else if (priceFilter === "medium")
+            priceMatch = priceNum >= 100000 && priceNum <= 150000;
+          else if (priceFilter === "high") priceMatch = priceNum > 150000;
+
+          return nameMatch && categoryMatch && priceMatch;
+        });
+
+        renderBooks(filtered);
+      }
+
+      renderBooks(books);
+    </script>
+  </body>
+</html>
