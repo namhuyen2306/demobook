@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <title>Thanh toán</title>
     <script>
-      // Giả sử giỏ hàng được lưu bằng localStorage
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
       function parsePrice(priceStr) {
@@ -42,7 +41,7 @@
           return;
         }
 
-        alert("Đơn hàng đã được xác nhận! Cảm ơn bạn.");
+        alert("Đơn hàng đã được xác nhận!");
         localStorage.removeItem("cart");
         window.location.href = "index.html";
       }
